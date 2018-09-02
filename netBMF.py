@@ -43,7 +43,6 @@ import scipy.sparse as ss
 def main():
     start = time.time()
     GSfile = sys.argv[1]
-    #outsuffix = sys.argv[2]
     outfile = sys.argv[2]
     isMH = int(sys.argv[3]) # 0: MCMC, 1: MH
     isNaive = int(sys.argv[4]) # 0: incre, 1: naive
@@ -56,8 +55,6 @@ def main():
     
     typestr = ('MH' if isMH else 'MCMC') + ('naive' if isNaive else 'incre')
 
-    #outfile = GSfile[:-4] + '_netBMF' + ('_MH' if isMH else '_MCMC') + ('_naive' if isNaive else '_incre') + '_k' + str(numberofpatterns) + '_iter' + str(numberofiterations) + '_minSize' + str(minPatternSize) + '_minFreq' + str(minPatternFreq) + '_seed' + str(numSeeds) + '_strategy' + ('Pair' if seedStrategy else 'Node') + '_' + outsuffix + '.mat'
-
     params = {'inputFile':GSfile,'numPatterns' : numberofpatterns, 'minSize' : minPatternSize, 'minFreq':minPatternFreq, 'numSeeds' :numSeeds, 'isMH':isMH,'numIters':numberofiterations,'isNaive':isNaive,'seedStrategy':seedStrategy}
 
     delAddProb = [0.3,0.7]
@@ -67,27 +64,7 @@ def main():
     numNodes = S.shape[1] #G.shape[0]
     numStates = S.shape[0]
 
-    # G = ss.csc_matrix(mat['S'].T.dot(mat['S']) )
-    # print('S shape: ', mat['S'].shape)
-    # print('Max: ', G.max())
-    # print('Non-zeros in G: ', G.nonzero)
-    # G.data *= G.data > 10
-    # G[G > 1] = 1
-    # print('Max: ', G.max())
-    # G.eliminate_zeros()
-    # print('Non-zeros in G: ', G.nonzero)
-
     print("G and S Read...", numNodes, "nodes.", numStates, "states. DONE!", time.time()-start, 'seconds')
-
-    # Compute W
-    #W = np.empty(S.shape)    
-    #W.fill(-1)
-    #W = np.full(S.shape,-1,np.int)
-    #end = time.time()
-    #print("W... Created!", end-start, 'seconds')
-    #W[np.nonzero(S)] = 1
-    #end = time.time()
-    #print("W... Filled!", end-start, 'seconds')
 
     Strans = (S.transpose() > 0).tolil()
     NodeFreqDict = [set(l) for l in Strans.rows]
@@ -169,8 +146,6 @@ def main():
                         maxPatternGain = TotalGain
                         maxPatternNodes = patternNodes
                         maxPatternSubgraphs = patternSubgraphs
-            #print '.',
-            #print('.',end='')
             patternNodes = maxPatternNodes
             patternSubgraphs = maxPatternSubgraphs
             patternGain = maxPatternGain
@@ -197,9 +172,8 @@ def main():
         patternSet[count] = patternNodes[:]
         patternSetDict[count] = patternSubgraphs[:]
 
-        # Update W, NodeFreqDict
+        # Update NodeFreqDict
         for n in patternNodes:
-            #W[patternSubgraphs, n] = 0
             C[patternSubgraphs, n] = 1
             for s in patternSubgraphs:
                 if s in NodeFreqDict[n]:
@@ -218,8 +192,6 @@ def main():
         print(typestr + ": P" + str(count) + ": " + str(patternSet[count]) + " with gain " + str(patternGain), '. Time:',runningTime[count],'seconds\n')
         count += 1
 
-    # First remove W to save some memory
-    #del W
     # Calculate Accuracy and Error --TODO: Convert the calculations to sparce matrix format!!
     MatrixM = np.zeros(shape=(numStates, numberofpatterns))
     MatrixB = np.zeros(shape=(numberofpatterns, numNodes))
