@@ -1,3 +1,4 @@
+
 #######################
 #### Network-constrained Binary Matrix Factorization (netBMF)
 # How to use:
@@ -23,8 +24,10 @@
 #       M (network_states x patterns) : mapping matrix (which network states contain which patterns)
 #       B (patterns x nodes) : pattern (basis) matrix which patterns contain which nodes
 #
-# Required python library: numpy, scipy
+# Required python library: numpy, scipy, networkx
 #######################
+__author__ = "Furkan Kocayusufoglu"
+
 import time
 import networkx as nx
 from random import choice
@@ -59,10 +62,20 @@ def main():
 
     delAddProb = [0.3,0.7]
     mat = sio.loadmat(GSfile, squeeze_me=True)
-    G = ss.csc_matrix(mat['G'])
     S = ss.csc_matrix(mat['S'])
-    numNodes = G.shape[0]
+    G = ss.csc_matrix(mat['G'])
+    numNodes = S.shape[1] #G.shape[0]
     numStates = S.shape[0]
+
+    # G = ss.csc_matrix(mat['S'].T.dot(mat['S']) )
+    # print('S shape: ', mat['S'].shape)
+    # print('Max: ', G.max())
+    # print('Non-zeros in G: ', G.nonzero)
+    # G.data *= G.data > 10
+    # G[G > 1] = 1
+    # print('Max: ', G.max())
+    # G.eliminate_zeros()
+    # print('Non-zeros in G: ', G.nonzero)
 
     print("G and S Read...", numNodes, "nodes.", numStates, "states. DONE!", time.time()-start, 'seconds')
 
