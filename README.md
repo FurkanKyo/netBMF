@@ -1,1 +1,1 @@
-# netBMF: Network-constrained Binary Matrix Factorization
+# netBMF: Network-constrained Boolean Matrix Factorization
